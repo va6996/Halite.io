@@ -46,7 +46,7 @@ public class Strategy {
                             + movementUtils.halitesOnPath(cell.position, player.shipyard.position) + " > 800");
                     destination = player.shipyard.position;
                     state = State.RETURNING;
-                    nextMove = movementUtils.getNextPosition(me.position, destination);
+                    nextMove = movementUtils.getNextPosition(me.position, destination, me);
                     Log.log("Going in direction: " + movementUtils.game.gameMap.getUnsafeMoves(me.position, nextMove)
                                                                                .get(0).charValue);
                     history.setState(nextMove, me, turn + 1);
@@ -61,9 +61,8 @@ public class Strategy {
                     Log.log("Collecting halites.");
                     return Direction.STILL;
                 }
-                nextMove = movementUtils.getNextPosition(me.position, destination);
-                Log.log("Going in direction: " + movementUtils.game.gameMap.getUnsafeMoves(me.position, nextMove)
-                                                                           .get(0).charValue);
+                nextMove = movementUtils.getNextPosition(me.position, destination, me);
+                Log.log("Going in direction: " + getDirectionOrStill(me.position, nextMove, movementUtils).charValue);
                 history.setState(nextMove, me, turn);
                 return getDirectionOrStill(me.position, nextMove, movementUtils);
             case CIRCLING:
@@ -71,14 +70,14 @@ public class Strategy {
                 if (nextPosition.isPresent()) {
                     destination = nextPosition.get();
                     Log.log("Going to " + nextPosition.get().toString());
-                    nextMove = movementUtils.getNextPosition(me.position, nextPosition.get());
+                    nextMove = movementUtils.getNextPosition(me.position, nextPosition.get(), me);
                     history.setState(nextMove, me, turn + 1);
                     return getDirectionOrStill(me.position, nextMove, movementUtils);
                 }
                 updateStrategy(clusterUtils, player);
                 break;
         }
-        nextMove = movementUtils.getNextPosition(me.position, destination);
+        nextMove = movementUtils.getNextPosition(me.position, destination, me);
         Log.log("Ship going from: " + me.position.toString() + " to: " + nextMove);
         history.setState(nextMove, me, turn + 1);
         return getDirectionOrStill(me.position, nextMove, movementUtils);
@@ -108,6 +107,7 @@ public class Strategy {
     }
 
     private Direction getDirectionOrStill(Position source, Position destination, MovementUtils movementUtils) {
+
         List<Direction> directions = movementUtils.game.gameMap.getUnsafeMoves(source, destination);
         if (directions.isEmpty()) {
             return Direction.STILL;

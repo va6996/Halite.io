@@ -114,7 +114,8 @@ public class MyBot {
                 conflictingShips = new ArrayList<>(History.conflictingShips);
             }
 
-            if (game.turnNumber <= 200 && me.halite >= Constants.SHIP_COST && !gameMap.at(me.shipyard).isOccupied()) {
+            if (game.turnNumber <= 200 && me.halite >= Constants.SHIP_COST
+                && !history.isOccupied(me.shipyard.position, game.turnNumber + 1)) {
                 commandQueue.add(me.shipyard.spawn());
                 Log.log("Generating new ship in turn number: " + game.turnNumber);
             }

@@ -9,6 +9,7 @@ import hlt.Game;
 import hlt.GameMap;
 import hlt.Log;
 import hlt.Position;
+import hlt.Ship;
 
 public class MovementUtils {
 
@@ -156,8 +157,9 @@ public class MovementUtils {
         return nearestPosition;
     }
 
-    public Position getNextPosition(Position source, Position destination) {
+    public Position getNextPosition(Position source, Position destination, Ship ship) {
         final ArrayList<Position> possibleMoves = new ArrayList<>();
+        final ArrayList<Position> otherMoves = new ArrayList<>();
         GameMap map = game.gameMap;
 
         final Position normalizedSource = map.normalize(source);
@@ -168,31 +170,46 @@ public class MovementUtils {
         final int wrapped_dx = map.width - dx;
         final int wrapped_dy = map.height - dy;
 
+        Position x1 = map.at(new Position(normalizedSource.x - 1, normalizedSource.y)).position;
+        Position x2 = map.at(new Position(normalizedSource.x + 1, normalizedSource.y)).position;
+
+        Position y1 = map.at(new Position(normalizedSource.x, normalizedSource.y - 1)).position;
+        Position y2 = map.at(new Position(normalizedSource.x, normalizedSource.y + 1)).position;
+
+
+
         if (normalizedSource.x < normalizedDestination.x) {
-            possibleMoves.add(dx > wrapped_dx ? map.at(new Position(normalizedSource.x - 1, normalizedSource.y)).position
-                                              : map.at(new Position(normalizedSource.x + 1, normalizedSource.y)).position);
+            possibleMoves.add(dx > wrapped_dx ? x1 : x2);
+            otherMoves.add(dx > wrapped_dx ? x2 : x1);
         } else if (normalizedSource.x > normalizedDestination.x) {
-            possibleMoves.add(dx > wrapped_dx ? map.at(new Position(normalizedSource.x + 1, normalizedSource.y)).position
-                                              : map.at(new Position(normalizedSource.x - 1, normalizedSource.y)).position);
+            possibleMoves.add(dx > wrapped_dx ? x2 : x1);
+            otherMoves.add(dx > wrapped_dx ? x1 : x2);
         }
 
         if (normalizedSource.y < normalizedDestination.y) {
-            possibleMoves.add(dy > wrapped_dy ? map.at(new Position(normalizedSource.x, normalizedSource.y - 1)).position
-                                              : map.at(new Position(normalizedSource.x, normalizedSource.y + 1)).position);
+            possibleMoves.add(dy > wrapped_dy ? y1 : y2);
+            otherMoves.add(0, dy > wrapped_dy ? y2 : y1);
         } else if (normalizedSource.y > normalizedDestination.y) {
-            possibleMoves.add(dy > wrapped_dy ? map.at(new Position(normalizedSource.x, normalizedSource.y + 1)).position
-                                              : map.at(new Position(normalizedSource.x, normalizedSource.y - 1)).position);
+            possibleMoves.add(dy > wrapped_dy ? y2 : y1);
+            otherMoves.add(0, dy > wrapped_dy ? y1 : y2);
         }
 
+        possibleMoves.addAll(otherMoves);
+        for (Position position : possibleMoves) {
+            Log.log("Possible move: " + position.toString());
+        }
         possibleMoves.removeIf(position -> history.isOccupied(position, game.turnNumber + 1));
-        if (possibleMoves.isEmpty()) {
+        if (possibleMoves.isEmpty() || (!ship.position.equals(game.me.shipyard.position) &&
+                                        game.gameMap.at(ship.position).halite * 0.1 > ship.halite)) {
             if (history.isOccupied(source, game.turnNumber + 1)) {
                 Log.log("Ship is in conflict because ship " + history.getShipAt(source, game.turnNumber + 1).id.id
                         + " already chose to come here. Adding it to conflictList.");
                 History.conflictingShips.add(history.getShipAt(source, game.turnNumber + 1));
             }
+            Log.log("Destination is same as source.");
             return source;
         }
+
         return possibleMoves.get(0);
     }
 }

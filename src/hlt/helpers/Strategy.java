@@ -47,8 +47,7 @@ public class Strategy {
                     destination = player.shipyard.position;
                     state = State.RETURNING;
                     nextMove = movementUtils.getNextPosition(me.position, destination, me);
-                    Log.log("Going in direction: " + movementUtils.game.gameMap.getUnsafeMoves(me.position, nextMove)
-                                                                               .get(0).charValue);
+                    Log.log("Going in direction: " + getDirectionOrStill(me.position, nextMove, movementUtils).charValue);
                     history.setState(nextMove, me, turn + 1);
                     return getDirectionOrStill(me.position, nextMove, movementUtils);
                 }

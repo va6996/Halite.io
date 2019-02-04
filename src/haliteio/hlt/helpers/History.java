@@ -20,7 +20,7 @@ public class History {
         this.game = game;
         Player player = game.me;
         GameMap map = game.gameMap;
-        state = new Ship[Constants.MAX_TURNS][map.width][map.height];
+        state = new Ship[Constants.MAX_TURNS + 2][map.width][map.height];
         this.player = player;
     }
 

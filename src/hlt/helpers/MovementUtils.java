@@ -200,7 +200,7 @@ public class MovementUtils {
         }
         possibleMoves.removeIf(position -> history.isOccupied(position, game.turnNumber + 1));
         if (possibleMoves.isEmpty() || (!ship.position.equals(game.me.shipyard.position) &&
-                                        game.gameMap.at(possibleMoves.get(0)).halite * 0.1 > ship.halite)) {
+                                        game.gameMap.at(ship.position).halite * 0.1 > ship.halite)) {
             if (history.isOccupied(source, game.turnNumber + 1)) {
                 Log.log("Ship is in conflict because ship " + history.getShipAt(source, game.turnNumber + 1).id.id
                         + " already chose to come here. Adding it to conflictList.");
